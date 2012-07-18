@@ -13769,7 +13769,7 @@ Footprint is not confirmed yet.</description>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
-<part name="IC3" library="linear-technology" deviceset="LTC485" device="S"/>
+<part name="IC3" library="linear-technology" deviceset="LTC485" device="S" value="SN75HVD11D"/>
 <part name="V2" library="supply0" deviceset="+3V3" device=""/>
 <part name="V3" library="supply0" deviceset="+3V3" device=""/>
 <part name="JP1" library="avr-7" deviceset="AVR-ISP-10" device="R"/>
