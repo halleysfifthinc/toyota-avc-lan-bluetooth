@@ -29,20 +29,19 @@
 
 int main(void)
 {
-//	wdt_disable();
-	_delay_ms(1000);
+
+	_delay_ms(50);
 	init_task_man();
-	bluetooth_init();
 	USART_INIT_POLLING();
+	bluetooth_init();
 //	USART_INIT_INTERRUPT();
 	AVC_init(1);
 	sei();
 //	usart_put_c('t');
-	_delay_ms(500);
-	AVC_add_tx_transaction_from_list(SELF_REGISTER);
+	_delay_ms(200);
+//	AVC_add_tx_transaction_from_list(SELF_REGISTER);
 	sei();
 	
-	add_task_no_arg(bluetooth_config, 0, SYSTEM_1_S, SYSTEM_1_S);
 //	wdt_enable( WDTO_2S );
 	
 	while(1){

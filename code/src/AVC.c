@@ -63,16 +63,29 @@ static MESSAGE* message_rx_tail;//insert here
 
 static uint8_t usart_quiet = 0;
 
-static uint8_t IS_PLAYING = 0;
 static uint8_t SECONDS = 0;
 static uint8_t MINUTES = 0;
 
+static uint8_t buttonSwitch = 0;
+
+void status_push(void)
+{
+	MESSAGE* msg = NULL;
+	while( (msg = AVC_add_tx_transaction_from_list(SELF_PLAYING_STATUS)) == NULL){
+					sei();
+	}
+	msg->data[8] = AVC_Toyota_digits(SECONDS);
+	msg->data[7] = AVC_Toyota_digits(MINUTES);
+	msg->data[5] = bluetooth_index() + 1;
+	sei();
+	
+}
+
 void status_update(void){
-	if(IS_PLAYING){
-		MESSAGE* msg = AVC_add_tx_transaction_from_list(SELF_PLAYING_STATUS);
-		msg->data[8] = AVC_Toyota_digits(SECONDS++);
-		msg->data[7] = AVC_Toyota_digits(MINUTES);
-		sei();
+	
+	status_push();
+	if(bluetooth_is_playing()){	
+		SECONDS++;
 		if(SECONDS == 60){
 			SECONDS = 0;
 			MINUTES++;
@@ -244,6 +257,15 @@ void handle_message(MSG_ID id){
 					sei();//release once we have altered what we need to.
 			}
 		break;
+		case LAN_REGISTER:
+			{
+				MESSAGE* message;
+				while( (message = AVC_add_tx_transaction_from_list(SELF_REGISTER)) == NULL){
+					sei();//release while we don't have something.
+				}
+					sei();//release once we have altered what we need to.
+			}
+		break;
 		case CONSOLE_DISK_BUTTON_1:
 			{
 				MESSAGE* message;
@@ -268,20 +290,21 @@ void handle_message(MSG_ID id){
 			break;
 		case CONSOLE_DISK_PLAY:
 			{
-				if(!IS_PLAYING){
-					MESSAGE* message;
-					while( (message = AVC_add_tx_transaction_from_list(RESP_CONSOLE_DISK_PLAY_0)) == NULL){
-						sei();
-					}
-						sei();
-					while( (message = AVC_add_tx_transaction_from_list(RESP_CONSOLE_DISK_PLAY_1)) == NULL){
-						sei();
-					}
+				/*
+				MESSAGE* message;
+				while( (message = AVC_add_tx_transaction_from_list(RESP_CONSOLE_DISK_PLAY_0)) == NULL){
 					sei();
-					
-					SECONDS = 0;
-					MINUTES = 0;
-					IS_PLAYING = 1;
+				}
+					sei();
+				*/
+				if(!bluetooth_connected())
+				{
+					bluetooth_enableSearch();
+					status_push();
+				}
+				if(!bluetooth_is_playing() && bluetooth_connected())
+				{
+					status_push();
 					bluetooth_play_song();
 				}
 				
@@ -289,7 +312,6 @@ void handle_message(MSG_ID id){
 			break;
 		case CONSOLE_DISK_STOP:
 			{
-				if(IS_PLAYING){
 					MESSAGE* message;
 					while( (message = AVC_add_tx_transaction_from_list(RESP_CONSOLE_DISK_STOP_0)) == NULL){
 						sei();
@@ -299,25 +321,84 @@ void handle_message(MSG_ID id){
 						sei();
 					}
 						sei();
-					IS_PLAYING = 0;
+					
 					bluetooth_pause_song();
-				}
-				
 			}
 			break;
 		case CONSOLE_SEEK_UP:
 			{
-				if(IS_PLAYING){
+				if(bluetooth_is_playing()){
 					bluetooth_next_song();
+				}
+				else
+				{
+					bluetooth_play_song();
 				}
 			}
 			break;
 		case CONSOLE_SEEK_DOWN:
 			{
-				if(IS_PLAYING){
+				if(bluetooth_is_playing()){
 					bluetooth_previous_song();
 				}
 			}
+			break;
+		case CONSOLE_BTN_1:
+			buttonSwitch = CONSOLE_BTN_1;
+			SECONDS = 0;
+			MINUTES = 0;
+			bluetooth_connectIndex(0);
+			break;
+		case CONSOLE_BTN_2:
+			if(buttonSwitch == CONSOLE_BTN_1)
+			{
+				buttonSwitch = CONSOLE_BTN_2;
+			}
+			SECONDS = 0;
+			MINUTES = 0;
+			bluetooth_connectIndex(1);
+			break;
+		case CONSOLE_BTN_3:
+			if(buttonSwitch == CONSOLE_BTN_2)
+			{
+				buttonSwitch = CONSOLE_BTN_3;
+			}
+			SECONDS = 0;
+			MINUTES = 0;
+			bluetooth_connectIndex(2);
+			break;
+		case CONSOLE_BTN_4:
+			if(buttonSwitch == CONSOLE_BTN_3)
+			{
+				buttonSwitch = CONSOLE_BTN_4;
+			}
+			SECONDS = 0;
+			MINUTES = 0;
+			bluetooth_connectIndex(3);
+			break;
+		case CONSOLE_BTN_5:
+			if(buttonSwitch == CONSOLE_BTN_4)
+			{
+				buttonSwitch = CONSOLE_BTN_5;
+			}
+			SECONDS = 0;
+			MINUTES = 0;
+			
+			bluetooth_disableSearch();
+			bluetooth_disconnectAll();
+			
+			break;
+		case CONSOLE_BTN_6:
+			if(buttonSwitch == CONSOLE_BTN_5)
+			{
+				buttonSwitch = 0;
+				reset_pairings();
+			}
+			SECONDS = 0;
+			MINUTES = 0;
+			bluetooth_disconnectAll();
+			bluetooth_enableSearch();
+			break;
 		default:
 		break;
 	}

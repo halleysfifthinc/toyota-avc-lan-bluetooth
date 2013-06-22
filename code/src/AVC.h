@@ -82,10 +82,6 @@ typedef struct message{
 } MESSAGE;
 
 
-
-
-
-
 void AVC_init(uint8_t quiet);
 MESSAGE* AVC_add_tx_transaction(uint16_t address_arg, uint8_t broadcast_arg, uint8_t control_arg, uint8_t data_size_arg, uint8_t * data_arg, uint8_t print);
 MESSAGE* AVC_add_tx_transaction_from_list(MSG_ID id);
