@@ -1,0 +1,1 @@
+I wanted to add Bluetooth capabilities to my car stereo without replacing the stock head unit. This is the result. Visit the Wiki for mor design information, browse the source, or look at my blog at http://bouldermaker.blogspot.com/ for more projects.
